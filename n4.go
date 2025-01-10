@@ -37,12 +37,12 @@ func (SerialForth) GetBytes(s string) (fixed string) {
 	return
 }
 
-func NewSerialForth() (forth SerialForth, err error) {
+func NewSerialForth(device string) (forth SerialForth, err error) {
 
 	// Configure the serial port
 	forth.config = &serial.Config{
-		Name: "/dev/ttyUSB1", // Replace with your Arduino port (e.g., COM3 on Windows)
-		Baud: 115200,         // Match the baud rate of your Arduino sketch
+		Name: device,
+		Baud: 115200,
 	}
 
 	// Open the serial port
