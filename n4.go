@@ -14,7 +14,7 @@ type SerialForth struct {
 	scanner *bufio.Scanner
 }
 
-func (SerialForth) getBytes(s string) (fixed string) {
+func (SerialForth) GetBytes(s string) (fixed string) {
 
 	rns := []rune(s) // convert to rune
 	for i, j := 0, len(rns)-1; i < j; i, j = i+1, j-1 {
