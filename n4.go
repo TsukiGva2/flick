@@ -12,6 +12,9 @@ type SerialForth struct {
 	config  *serial.Config
 	port    *serial.Port
 	scanner *bufio.Scanner
+
+	capture       bool
+	captureBuffer chan string
 }
 
 func (SerialForth) GetBytes(s string) (fixed string) {
@@ -61,7 +64,7 @@ func NewSerialForth() (forth SerialForth, err error) {
 
 	// shorthand for end of line
 	err = forth.Run(": $ 15 ;")
-	err = forth.Run("1 TRC")
+	//err = forth.Run("1 TRC")
 
 	if err != nil {
 
@@ -88,7 +91,12 @@ func (forth *SerialForth) ReadAll() (err error) {
 		for forth.scanner.Scan() {
 
 			//fmt.Println(forth.scanner.Text()) // Println will add back the final '\n'
-			forth.scanner.Text() // Println will add back the final '\n'
+			out := forth.scanner.Text()
+
+			if forth.capture {
+
+				forth.captureBuffer <- out
+			}
 		}
 	}()
 
@@ -100,6 +108,22 @@ func (forth *SerialForth) ReadAll() (err error) {
 func (forth *SerialForth) Close() {
 
 	forth.port.Close()
+}
+
+// TODO: bufio
+func (forth *SerialForth) Query(msg string) (output string, err error) {
+
+	forth.capture = true
+
+	_, err = forth.port.Write(append([]byte(msg), '\n'))
+
+	time.Sleep(500 * time.Millisecond)
+
+	output = <-forth.captureBuffer
+
+	forth.capture = false
+
+	return
 }
 
 func (forth *SerialForth) Run(msg string) (err error) {
