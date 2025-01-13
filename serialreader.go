@@ -10,12 +10,15 @@ type SerialReader struct {
 	mu       sync.Mutex
 	latest   string
 	stopChan chan struct{}
+
+	Available chan struct{}
 }
 
 func NewSerialReader() *SerialReader {
 
 	return &SerialReader{
-		stopChan: make(chan struct{}),
+		Available: make(chan struct{}),
+		stopChan:  make(chan struct{}),
 	}
 }
 
@@ -29,6 +32,8 @@ func (sr *SerialReader) Start(scanner *bufio.Scanner) {
 				return
 			default:
 				if scanner.Scan() {
+
+					sr.Available <- struct{}{}
 
 					sr.mu.Lock()
 					sr.latest = scanner.Text()
@@ -49,6 +54,16 @@ func (sr *SerialReader) Start(scanner *bufio.Scanner) {
 			}
 		}
 	}()
+}
+
+func (sr *SerialReader) Wait() {
+
+	if sr.Available == nil {
+
+		return
+	}
+
+	<-sr.Available
 }
 
 func (sr *SerialReader) Stop() {
