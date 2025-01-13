@@ -1,4 +1,4 @@
-package flick
+package main
 
 import (
 	"bufio"
@@ -13,8 +13,7 @@ type SerialForth struct {
 	port    *serial.Port
 	scanner *bufio.Scanner
 
-	capture       bool
-	captureBuffer chan string
+	serialReader *SerialReader
 }
 
 func (SerialForth) GetBytes(s string) (fixed string) {
@@ -72,56 +71,30 @@ func NewSerialForth(device string) (forth SerialForth, err error) {
 	}
 
 	forth.scanner = bufio.NewScanner(forth.port)
-
 	err = forth.scanner.Err()
 
-	forth.ReadAll()
-
-	return
-}
-
-func (forth *SerialForth) ReadAll() (err error) {
-
-	if forth.scanner == nil {
+	if err != nil {
 
 		return
 	}
 
-	go func() {
-		for forth.scanner.Scan() {
-
-			//fmt.Println(forth.scanner.Text()) // Println will add back the final '\n'
-			out := forth.scanner.Text()
-
-			if forth.capture {
-
-				forth.captureBuffer <- out
-			}
-		}
-	}()
-
-	err = forth.scanner.Err()
+	forth.serialReader = NewSerialReader()
+	forth.serialReader.Start(forth.scanner)
 
 	return
 }
 
 func (forth *SerialForth) Close() {
 
+	forth.serialReader.Stop()
 	forth.port.Close()
 }
 
-// TODO: bufio
 func (forth *SerialForth) Query(msg string) (output string, err error) {
 
-	forth.capture = true
+	err = forth.Run(msg)
 
-	_, err = forth.port.Write(append([]byte(msg), '\n'))
-
-	time.Sleep(500 * time.Millisecond)
-
-	output = <-forth.captureBuffer
-
-	forth.capture = false
+	output = forth.serialReader.GetLatest()
 
 	return
 }
