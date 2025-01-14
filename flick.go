@@ -1,4 +1,4 @@
-package main
+package flick
 
 import (
 	"fmt"
@@ -123,35 +123,17 @@ func (f *MyTempo_Forth) Send(input string) (response string, err error) {
 	return
 }
 
-func S(r1, r2, r3, r4 string, l1, v1, l2, v2, l3, v3, l4, v4 int64) string {
+func (f *MyTempo_Forth) Consume() (output string) {
 
-	return fmt.Sprintf(r1+" "+r2+" "+r3+" "+r4, l1, v1, l2, v2, l3, v3, l4, v4)
-}
+	for {
 
-func main() {
-
-	fth, err := NewForth("/dev/ttyUSB0")
-
-	if err != nil {
-
-		return
+		select {
+		case resp := <-f.responseChan:
+			output += resp
+		case <-time.After(2 * time.Second):
+			break
+		}
 	}
 
-	fth.Start()
-
-	fth.Send(
-		S(
-			"%d lbl %d num",
-			"%d lbl %d num",
-			"%d lbl %d num",
-			"%d lbl %d val",
-
-			PORTAL, 701,
-			REGIST, 0,
-			UNICAS, 0,
-			COMUNICANDO, WEB,
-		),
-	)
-
-	fth.Stop()
+	return
 }
