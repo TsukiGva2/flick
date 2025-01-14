@@ -131,7 +131,7 @@ func (f *MyTempo_Forth) Consume() (output string) {
 		case resp := <-f.responseChan:
 			output += resp
 		case <-time.After(2 * time.Second):
-			break
+			return
 		}
 	}
 
