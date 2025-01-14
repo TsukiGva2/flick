@@ -95,12 +95,12 @@ func (f *MyTempo_Forth) Start() {
 	}()
 }
 
-func (f *MyTempo_Forth) Send(input string) {
+func (f *MyTempo_Forth) Send(input string) (response string, err error) {
 
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
-	_, err := f.port.Write([]byte(input + "\n"))
+	_, err = f.port.Write([]byte(input + "\n"))
 
 	if err != nil {
 
@@ -112,10 +112,13 @@ func (f *MyTempo_Forth) Send(input string) {
 	fmt.Printf("Sent: %s\n", input)
 
 	// Wait for a response with synchronization
-	response := <-f.responseChan
+	response = <-f.responseChan
+
 	fmt.Printf("> %s\n", strings.TrimSpace(response))
 
 	//time.Sleep(50 * time.Millisecond)
+
+	return
 }
 
 /*
