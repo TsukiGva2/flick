@@ -1,4 +1,4 @@
-package flick
+package main
 
 import (
 	"fmt"
@@ -32,6 +32,8 @@ const (
 	CONECTAD
 	DESLIGAD
 	AUTOMATIC
+	OK
+	X
 
 	VALUES_COUNT
 )
@@ -121,7 +123,11 @@ func (f *MyTempo_Forth) Send(input string) (response string, err error) {
 	return
 }
 
-/*
+func S(r1, r2, r3, r4 string, l1, v1, l2, v2, l3, v3, l4, v4 int64) string {
+
+	return fmt.Sprintf(r1+" "+r2+" "+r3+" "+r4, l1, v1, l2, v2, l3, v3, l4, v4)
+}
+
 func main() {
 
 	fth, err := NewForth("/dev/ttyUSB0")
@@ -132,7 +138,20 @@ func main() {
 	}
 
 	fth.Start()
-	fth.Send("1 5 API 92 4 API")
+
+	fth.Send(
+		S(
+			"%d lbl %d num",
+			"%d lbl %d num",
+			"%d lbl %d num",
+			"%d lbl %d val",
+
+			PORTAL, 701,
+			REGIST, 0,
+			UNICAS, 0,
+			COMUNICANDO, WEB,
+		),
+	)
+
 	fth.Stop()
 }
-*/
