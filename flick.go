@@ -123,15 +123,31 @@ func (f *MyTempo_Forth) Send(input string) (response string, err error) {
 	return
 }
 
-func (f *MyTempo_Forth) Consume() (output string) {
+func (f *MyTempo_Forth) Query(input string) (multilineResponse string, err error) {
+
+	f.mu.Lock()
+	defer f.mu.Unlock()
+
+	_, err = f.port.Write([]byte(input + "\n"))
+
+	if err != nil {
+
+		log.Printf("Failed to send data: %v", err)
+
+		return
+	}
+
+	fmt.Printf("Sent: %s\n", input)
+
+	var multilineResponse string
 
 	for {
+		response = <-f.responseChan
+		multilineResponse += response
 
-		select {
-		case resp := <-f.responseChan:
-			output += resp
-		case <-time.After(2 * time.Second):
-			return
+		if strings.Contains(multilineResponse, "ok") {
+
+			break
 		}
 	}
 
