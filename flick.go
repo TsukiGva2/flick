@@ -139,10 +139,8 @@ func (f *MyTempo_Forth) Query(input string) (multilineResponse string, err error
 
 	fmt.Printf("Sent: %s\n", input)
 
-	var multilineResponse string
-
 	for {
-		response = <-f.responseChan
+		response := <-f.responseChan
 		multilineResponse += response
 
 		if strings.Contains(multilineResponse, "ok") {
