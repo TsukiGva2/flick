@@ -1,7 +1,7 @@
 //#include <EnableInterrupt.h>
 #include <LiquidCrystal_I2C.h>
-#include <Wire.h>
-#include <HardwareSerial.h>
+//#include <Wire.h>
+//#include <HardwareSerial.h>
 #include <nanoFORTH.h>
 
 #define LABEL_COUNT 10
@@ -9,7 +9,7 @@
 const char* labels[] = {
   "PORTAL   ",
   "UNICAS   ",
-  "REGIST.   ",
+  "REGIST.  ",
   "COMUNICANDO ",
   "LEITOR ",
   "LTE/4G: ",
@@ -17,6 +17,9 @@ const char* labels[] = {
   "IP: ",
   "LOCAL: ",
   "PROVA: "
+};
+const int labels_len[LABEL_COUNT] = {
+  9,9,9,12,7,8,6,4,7,7
 };
 
 #define VALUE_COUNT 4
@@ -59,7 +62,7 @@ void setup() {
   n4_api(7, forth_ip);
   n4_api(4, forth_number);
 
-  pinMode(2, INPUT_PULLUP);
+  pinMode(7, INPUT_PULLUP);
 }
 
 void forth_value() {
@@ -91,7 +94,7 @@ void forth_number() {
 
 void forth_label() {
 
-  forth_clear_line();
+  static int current_labels[4] = {0,0,0,0};
 
   int v = n4_pop();
   if (v > LABEL_COUNT) {
@@ -99,17 +102,23 @@ void forth_label() {
     return;
   }
 
-  lcd.print(labels[v]);
+  if (v != current_labels[g_y]) {
+    forth_clear_line(0);
+    current_labels[g_y] = v;
+    lcd.print(labels[v]);
+  } else {
+    forth_clear_line(labels_len[v]);
+  }
 }
 
-void forth_clear_line() {
-  lcd.setCursor(0, g_y);
+void forth_clear_line(int x) {
+  lcd.setCursor(x, g_y);
 
-  for (size_t i = 0; i <= 16; i++) {
-    lcd.print(" ");
+  for (size_t i = x; i <= 16; i++) {
+    lcd.print(' ');
   }
 
-  lcd.setCursor(0, g_y);
+  lcd.setCursor(x, g_y);
 }
 
 void forth_fwd() {
