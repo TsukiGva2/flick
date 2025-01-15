@@ -111,12 +111,12 @@ func (f *MyTempo_Forth) Send(input string) (response string, err error) {
 		return
 	}
 
-	fmt.Printf("Sent: %s\n", input)
+	//fmt.Printf("Sent: %s\n", input)
 
 	// Wait for a response with synchronization
 	response = <-f.responseChan
 
-	fmt.Printf("> %s\n", strings.TrimSpace(response))
+	//fmt.Printf("> %s\n", strings.TrimSpace(response))
 
 	//time.Sleep(50 * time.Millisecond)
 
