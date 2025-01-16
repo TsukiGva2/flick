@@ -4,11 +4,11 @@
 //#include <HardwareSerial.h>
 #include <nanoFORTH.h>
 
-#define LABEL_COUNT 10
+#define LABEL_COUNT 11
 
 const char* labels[] = {
-  "PORTAL   ",
-  "UNICAS   ",
+  "PORTAL   My",
+  "ATLETAS  ",
   "REGIST.  ",
   "COMUNICANDO ",
   "LEITOR ",
@@ -16,10 +16,11 @@ const char* labels[] = {
   "WIFI: ",
   "IP: ",
   "LOCAL: ",
-  "PROVA: "
+  "PROVA: ",
+  "PING: "
 };
 const int labels_len[LABEL_COUNT] = {
-  9,9,9,12,7,8,6,4,7,7
+  11,9,9,12,7,8,6,4,7,7,6
 };
 
 #define VALUE_COUNT 4
@@ -39,7 +40,8 @@ const char code[] PROGMEM =          ///< define preload Forth code here
 ": lit API fwd ;\n"
 ": num 4 lit ;\n"
 ": val 6 lit ;\n"
-": ip  7 lit ;\n";
+": ip  7 lit ;\n"
+": atn 1 lit ;\n";
 
 uint8_t g_x, g_y;
 
@@ -53,7 +55,7 @@ void setup() {
   while(!Serial);
 
   n4_setup(code);
-  //n4_api(1, forth_display);
+  n4_api(1, forth_antenna);
   n4_api(2, forth_fwd);
   // n4_api(3, forth_clear_cursor);
 
@@ -76,6 +78,43 @@ void forth_value() {
   lcd.print(values[v]);
 }
 
+void print_forthNumber() {
+
+  int mag = n4_pop();
+  int v = n4_pop();
+
+  lcd.print(v);
+
+  if (mag == 0)
+    return;
+
+  if (mag >= 3 && mag < 6) {
+
+    lcd.print('K');
+
+    return;
+  }
+
+  lcd.print('M');
+}
+
+void forth_antenna() {
+
+  forth_clear_line(4);
+  lcd.setCursor(0, g_y);
+  lcd.print("A1: ");
+  print_forthNumber();
+  lcd.print("  A2: ");
+  print_forthNumber();
+  forth_fwd();
+  forth_clear_line(4);
+  lcd.setCursor(0, g_y);
+  lcd.print("A3: ");
+  print_forthNumber();
+  lcd.print("  A4: ");
+  print_forthNumber();
+}
+
 void forth_ip() {
 
   lcd.print(n4_pop());
@@ -94,10 +133,10 @@ void forth_number() {
 
 void forth_label() {
 
-  static int current_labels[4] = {0,0,0,0};
+  static int current_labels[4] = {-1,-1,-1,-1};
 
   int v = n4_pop();
-  if (v > LABEL_COUNT) {
+  if (v >= LABEL_COUNT) {
     lcd.print("-----");
     return;
   }
