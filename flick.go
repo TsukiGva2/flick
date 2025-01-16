@@ -22,6 +22,7 @@ const (
 	IP
 	LOCAL
 	PROVA
+	PING
 
 	LABELS_COUNT
 )
