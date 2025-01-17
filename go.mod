@@ -1,4 +1,4 @@
-module github.com/MyTempoesp/flick
+module flick
 
 go 1.22
 

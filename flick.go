@@ -10,51 +10,20 @@ import (
 	"github.com/MyTempoESP/serial"
 )
 
-// LABELS
-const (
-	PORTAL = iota
-	UNICAS
-	REGIST
-	COMUNICANDO
-	LEITOR
-	LTE4G
-	WIFI
-	IP
-	LOCAL
-	PROVA
-	PING
-
-	LABELS_COUNT
-)
-
-// VALUES
-const (
-	WEB = iota
-	CONECTAD
-	DESLIGAD
-	AUTOMATIC
-	OK
-	X
-
-	VALUES_COUNT
-)
-
-type MyTempo_Forth struct {
+type Forth struct {
 	port         *serial.Port
 	mu           sync.Mutex
 	responseChan chan string
 }
 
-func NewForth(dev string) (f MyTempo_Forth, err error) {
+func NewForth(dev string) (f Forth, err error) {
 
-	// Configure the serial port
 	conf := &serial.Config{
-		Name:        dev,    // Update to match your serial port
-		Baud:        115200, // Adjust the baud rate as needed
+		Name:        dev,
+		Baud:        115200,
 		ReadTimeout: time.Second * 1,
 	}
 
-	// Open the serial port
 	f.port, err = serial.OpenPort(conf)
 
 	if err != nil {
@@ -67,15 +36,14 @@ func NewForth(dev string) (f MyTempo_Forth, err error) {
 	return
 }
 
-func (f *MyTempo_Forth) Stop() {
+func (f *Forth) Stop() {
 
 	f.port.Close()
 	close(f.responseChan)
 }
 
-func (f *MyTempo_Forth) Start() {
+func (f *Forth) Start() {
 
-	// Goroutine to read data from the Arduino
 	go func() {
 
 		buf := make([]byte, 128)
@@ -98,7 +66,7 @@ func (f *MyTempo_Forth) Start() {
 	}()
 }
 
-func (f *MyTempo_Forth) Send(input string) (response string, err error) {
+func (f *Forth) Send(input string) (response string, err error) {
 
 	f.mu.Lock()
 	defer f.mu.Unlock()
@@ -112,19 +80,12 @@ func (f *MyTempo_Forth) Send(input string) (response string, err error) {
 		return
 	}
 
-	//fmt.Printf("Sent: %s\n", input)
-
-	// Wait for a response with synchronization
 	response = <-f.responseChan
-
-	//fmt.Printf("> %s\n", strings.TrimSpace(response))
-
-	//time.Sleep(50 * time.Millisecond)
 
 	return
 }
 
-func (f *MyTempo_Forth) Query(input string) (multilineResponse string, err error) {
+func (f *Forth) Query(input string) (multilineResponse string, err error) {
 
 	f.mu.Lock()
 	defer f.mu.Unlock()
