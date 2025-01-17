@@ -16,12 +16,12 @@ type Forth struct {
 	responseChan chan string
 }
 
-func NewForth(dev string) (f Forth, err error) {
+func NewForth(dev string, timeout time.Duration) (f Forth, err error) {
 
 	conf := &serial.Config{
 		Name:        dev,
 		Baud:        115200,
-		ReadTimeout: time.Second * 1,
+		ReadTimeout: timeout,
 	}
 
 	f.port, err = serial.OpenPort(conf)
