@@ -1,4 +1,4 @@
-module flick
+module github.com/TsukiGva2/flick
 
 go 1.22
 
